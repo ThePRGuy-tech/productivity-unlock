@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Productivity Unlock</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f5f3;--card:#fff;--card2:#f0efe8;
+  --t:#1a1a1a;--t2:#666660;--t3:#99998f;
+  --bd:rgba(0,0,0,0.10);--bd2:rgba(0,0,0,0.18);
+  --g:#1D9E75;--gl:#E1F5EE;--gd:#0F6E56;
+  --pu:#7F77DD;--r:#D85A30;--bl:#378ADD;
+  --rr:8px;--rl:12px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1a1a18;--card:#252523;--card2:#2e2e2b;
+  --t:#f0efe8;--t2:#a0a096;--t3:#666660;
+  --bd:rgba(255,255,255,0.09);--bd2:rgba(255,255,255,0.16);
+  --g:#5DCAA5;--gl:#04342C;--gd:#9FE1CB;
+  --pu:#AFA9EC;--r:#F0997B;--bl:#85B7EB;
+}}
+
+html{height:100%}
+body{
+  height:100%;display:flex;flex-direction:column;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);color:var(--t);font-size:16px;
+  overflow:hidden;
+}
+
+/* TOPBAR — fixed height */
+.topbar{
+  flex-shrink:0;background:var(--card);
+  border-bottom:0.5px solid var(--bd);
+  padding:12px 16px 10px;
+}
+.topbar-row{display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:17px;font-weight:600;color:var(--t)}
+.topbar-date{font-size:11px;color:var(--t3);margin-top:2px}
+.reset-btn{
+  font-size:12px;color:var(--t2);background:none;
+  border:0.5px solid var(--bd2);border-radius:6px;
+  padding:6px 11px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  min-height:32px;
+}
+
+/* XP BLOCK — fixed height */
+.xp-block{
+  flex-shrink:0;background:var(--card);
+  border-bottom:0.5px solid var(--bd);padding:12px 16px;
+}
+.xp-row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px}
+.xp-main .num{font-size:28px;font-weight:600;color:var(--t);line-height:1}
+.xp-main .lbl{font-size:11px;color:var(--t2);margin-top:3px}
+.xp-side{text-align:right}
+.xp-side .num{font-size:18px;font-weight:500;color:var(--t)}
+.xp-side .lbl{font-size:11px;color:var(--t2);margin-top:3px}
+.bar-track{height:8px;background:var(--bd);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;background:var(--g);transition:width .35s}
+.bar-meta{display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:var(--t3)}
+.goal-badge{background:var(--gl);border:0.5px solid var(--g);border-radius:var(--rr);padding:5px 10px;font-size:12px;color:var(--gd);margin-top:8px;display:none}
+.goal-badge.on{display:block}
+
+/* NAV TABS — fixed height */
+.nav{
+  flex-shrink:0;background:var(--card);
+  border-top:0.5px solid var(--bd);
+  display:flex;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.nav-btn{
+  flex:1;padding:10px 4px 8px;border:none;background:transparent;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;
+  gap:3px;font-size:10px;font-weight:500;color:var(--t3);
+  -webkit-tap-highlight-color:transparent;
+}
+.nav-btn.active{color:var(--g)}
+.nav-icon{font-size:20px;line-height:1}
+
+/* SCROLLABLE CONTENT AREA */
+.content{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:var(--bg);
+}
+
+/* PANELS */
+.panel{display:none;padding-bottom:20px}
+.panel.active{display:block}
+
+/* SECTION LABEL */
+.slabel{
+  font-size:11px;font-weight:600;letter-spacing:.06em;
+  color:var(--t3);text-transform:uppercase;
+  padding:16px 16px 8px;
+}
+
+/* TASKS */
+.tasks-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.task-btn{
+  background:var(--card);border:0.5px solid var(--bd);
+  border-radius:var(--rl);padding:12px;text-align:left;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  width:100%;transition:opacity .1s;
+}
+.task-btn:active{opacity:.5}
+.task-btn.capped{opacity:.3;pointer-events:none}
+.t-name{font-size:13px;font-weight:500;color:var(--t);line-height:1.3}
+.t-xp{font-size:12px;color:var(--g);font-weight:600;margin-top:4px}
+.t-cap{font-size:11px;color:var(--t3);margin-top:2px}
+
+/* BUNDLE */
+.bundle-wrap{padding:0 16px}
+.bundle-card{background:var(--card);border:0.5px solid var(--bd);border-radius:var(--rl);padding:14px}
+.bundle-head{font-size:14px;font-weight:500;color:var(--t);margin-bottom:12px}
+.bundle-checks{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.bcheck{display:flex;align-items:center;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:32px}
+.bbox{
+  width:22px;height:22px;border-radius:5px;
+  border:0.5px solid var(--bd2);background:var(--card2);
+  flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;transition:all .15s;
+}
+.bbox.on{background:var(--g);border-color:var(--gd)}
+.bbox.on::after{content:'';width:6px;height:10px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg);margin-top:-2px}
+.blabel{font-size:14px;color:var(--t2)}
+.bclaim{
+  width:100%;padding:12px;border-radius:var(--rr);
+  border:0.5px solid var(--bd2);background:transparent;
+  font-size:14px;font-weight:500;color:var(--t);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.bclaim:disabled{opacity:.3}
+.bclaim.ready{background:var(--g);color:var(--gl);border-color:var(--gd)}
+.bclaim.claimed{background:var(--card2);color:var(--t3);border-color:var(--bd)}
+
+/* REWARDS */
+.rewards-wrap{padding:0 16px;display:flex;flex-direction:column;gap:8px}
+.rcard{background:var(--card);border:0.5px solid var(--bd);border-radius:var(--rl);padding:12px 14px;display:flex;align-items:center;gap:10px}
+.rname{flex:1;font-size:14px;color:var(--t)}
+.rcost{font-size:13px;color:var(--t2);white-space:nowrap}
+.runlock{
+  font-size:12px;font-weight:600;padding:7px 14px;
+  border-radius:var(--rr);border:0.5px solid var(--bd2);
+  background:transparent;cursor:pointer;color:var(--t);
+  -webkit-tap-highlight-color:transparent;white-space:nowrap;
+  min-height:34px;
+}
+.runlock:disabled{opacity:.3}
+.runlock.on{background:var(--g);color:var(--gl);border-color:var(--gd)}
+
+/* LOG */
+.log-wrap{padding:0 16px}
+.log-card{background:var(--card);border:0.5px solid var(--bd);border-radius:var(--rl);overflow:hidden}
+.log-entry{display:flex;align-items:baseline;gap:8px;padding:9px 14px;border-bottom:0.5px solid var(--bd);font-size:12px}
+.log-entry:last-child{border-bottom:none}
+.ltime{color:var(--t3);flex-shrink:0;font-size:11px}
+.ltext{flex:1;color:var(--t2)}
+.lval{flex-shrink:0;font-weight:600}
+.c-earn{color:var(--g)}.c-spend{color:var(--r)}.c-bundle{color:var(--pu)}.c-mile{color:var(--bl)}
+.log-empty{padding:20px 14px;font-size:13px;color:var(--t3);text-align:center}
+
+/* HISTORY */
+.hist-wrap{padding:0 16px;display:flex;flex-direction:column;gap:10px}
+.hday{background:var(--card);border:0.5px solid var(--bd);border-radius:var(--rl);padding:14px}
+.hdate{font-size:14px;font-weight:500;color:var(--t);margin-bottom:8px}
+.hstats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.hstat{font-size:12px;color:var(--t2)}.hstat b{color:var(--t);font-weight:500}
+.htasks{font-size:12px;color:var(--t3);line-height:1.6}
+.hempty{text-align:center;padding:40px 16px;font-size:14px;color:var(--t3)}
+
+/* BALANCE ROW on rewards tab */
+.bal-row{
+  margin:0 16px 4px;background:var(--card);
+  border:0.5px solid var(--bd);border-radius:var(--rl);
+  padding:12px 14px;display:flex;justify-content:space-between;align-items:center;
+}
+.bal-row span{font-size:13px;color:var(--t2)}
+.bal-row strong{font-size:20px;font-weight:600;color:var(--t)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-row">
+    <h1>Productivity Unlock</h1>
+    <button class="reset-btn" id="reset-btn">↺ Reset day</button>
+  </div>
+  <div class="topbar-date" id="topbar-date"></div>
+</div>
+
+<!-- XP BLOCK -->
+<div class="xp-block">
+  <div class="xp-row">
+    <div class="xp-main">
+      <div class="num" id="xp-val">0</div>
+      <div class="lbl">XP available</div>
+    </div>
+    <div class="xp-side">
+      <div class="num" id="xp-today">0</div>
+      <div class="lbl">earned today</div>
+    </div>
+  </div>
+  <div class="bar-track"><div class="bar-fill" id="bar" style="width:0%"></div></div>
+  <div class="bar-meta">
+    <span>goal: 100 XP — extras bank</span>
+    <span id="bar-pct">0%</span>
+  </div>
+  <div class="goal-badge" id="goal-badge">Daily goal hit — keep going!</div>
+</div>
+
+<!-- SCROLLABLE CONTENT -->
+<div class="content" id="content">
+
+  <!-- TODAY -->
+  <div class="panel active" id="panel-today">
+    <div class="slabel">Tasks</div>
+    <div class="tasks-grid" id="tasks-grid"></div>
+
+    <div class="slabel">Daily grind bundle — +50 XP</div>
+    <div class="bundle-wrap">
+      <div class="bundle-card">
+        <div class="bundle-head">Hit all three to claim</div>
+        <div class="bundle-checks" id="bundle-checks"></div>
+        <button class="bclaim" id="bclaim" disabled>Claim +50 XP</button>
+      </div>
+    </div>
+
+    <div class="slabel">Today's log</div>
+    <div class="log-wrap"><div class="log-card" id="log-card"></div></div>
+  </div>
+
+  <!-- REWARDS -->
+  <div class="panel" id="panel-rewards">
+    <div class="slabel">Balance</div>
+    <div class="bal-row">
+      <span>Available to spend</span>
+      <strong id="xp-val-r">0 XP</strong>
+    </div>
+    <div class="slabel">Unlock</div>
+    <div class="rewards-wrap" id="rewards-list"></div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="panel" id="panel-history">
+    <div class="slabel">Past days</div>
+    <div class="hist-wrap" id="hist-list"></div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="nav">
+  <button class="nav-btn active" id="nav-today">
+    <span class="nav-icon">✦</span>Today
+  </button>
+  <button class="nav-btn" id="nav-rewards">
+    <span class="nav-icon">★</span>Rewards
+  </button>
+  <button class="nav-btn" id="nav-history">
+    <span class="nav-icon">◷</span>History
+  </button>
+</nav>
+
+<script>
+var KEY='pu6';
+var GOAL=100;
+
+var TASKS=[
+  {id:'sql',name:'SQL practice (30 min)',xp:10,cap:null},
+  {id:'job',name:'Job application',xp:5,cap:15,capLabel:'cap 15 XP/day'},
+  {id:'pbi',name:'Power BI (30 min)',xp:10,cap:null},
+  {id:'gym',name:'Gym / workout',xp:25,cap:null},
+  {id:'uber',name:'Uber block (1 hr)',xp:5,cap:null},
+  {id:'read',name:'Read / study (1 hr)',xp:10,cap:null},
+  {id:'li',name:'LinkedIn outreach (3)',xp:5,cap:null},
+  {id:'walk5k',name:'Walk 5k steps',xp:10,cap:null},
+  {id:'walk10k',name:'Walk 10k steps',xp:20,cap:null},
+  {id:'push',name:'20 pushups',xp:5,cap:null},
+  {id:'protein',name:'Protein shake / creatine',xp:3,cap:null},
+];
+
+var BUNDLES=[
+  {id:'bs',label:'Walk 10k steps'},
+  {id:'bp',label:'Eat 180g protein'},
+  {id:'bu',label:'Earn $200 driving'},
+];
+
+var REWARDS=[
+  {name:'Anime episode (~24 min)',cost:20},
+  {name:'Light novel chapter',cost:5},
+  {name:'TV show — short (25 min)',cost:20},
+  {name:'TV show — full (50 min)',cost:40},
+  {name:'Gaming session (1 hr)',cost:40},
+  {name:'YouTube / scroll (30 min)',cost:15},
+  {name:'Movie (2 hr)',cost:85},
+  {name:'Free afternoon',cost:150},
+];
+
+function def(){
+  return{xp:0,today:0,goalLogged:false,log:[],taskXp:{},bdone:false,bchecks:{},history:[],lastDay:null};
+}
+function load(){
+  try{var r=localStorage.getItem(KEY);return r?Object.assign(def(),JSON.parse(r)):def();}
+  catch(e){return def();}
+}
+function save(){
+  try{var s=JSON.parse(JSON.stringify(S));s.log=s.log.slice(0,60);localStorage.setItem(KEY,JSON.stringify(s));}
+  catch(e){}
+}
+
+var S=load();
+
+function ts(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+function dateStr(){return new Date().toLocaleDateString([],{weekday:'short',month:'short',day:'numeric',year:'numeric'});}
+function todayKey(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+
+// NAV
+function switchPanel(name){
+  ['today','rewards','history'].forEach(function(n){
+    document.getElementById('panel-'+n).classList.toggle('active',n===name);
+    document.getElementById('nav-'+n).classList.toggle('active',n===name);
+  });
+  document.getElementById('content').scrollTop=0;
+  if(name==='history') renderHistory();
+  updateUI();
+}
+
+document.getElementById('nav-today').addEventListener('click',function(){switchPanel('today');});
+document.getElementById('nav-rewards').addEventListener('click',function(){switchPanel('rewards');});
+document.getElementById('nav-history').addEventListener('click',function(){switchPanel('history');});
+
+// RESET — no confirm(), just do it (confirm blocks on iOS in some contexts)
+document.getElementById('reset-btn').addEventListener('click',function(){
+  doArchive();
+  save();
+  renderTasks();
+  renderBundle();
+  renderLog();
+  updateUI();
+  document.getElementById('content').scrollTop=0;
+});
+
+function updateUI(){
+  document.getElementById('xp-val').textContent=S.xp;
+  document.getElementById('xp-today').textContent=S.today;
+  var r=document.getElementById('xp-val-r');
+  if(r) r.textContent=S.xp+' XP';
+  var pct=Math.min(100,Math.round(S.today/GOAL*100));
+  var bar=document.getElementById('bar');
+  bar.style.width=pct+'%';
+  bar.style.background=S.today>=GOAL?'var(--pu)':'var(--g)';
+  document.getElementById('bar-pct').textContent=pct+'%';
+  document.getElementById('goal-badge').classList.toggle('on',S.today>=GOAL);
+
+  TASKS.forEach(function(t){
+    var btn=document.getElementById('tbtn-'+t.id);
+    if(!btn) return;
+    var hit=t.cap&&(S.taskXp[t.id]||0)>=t.cap;
+    btn.classList.toggle('capped',!!hit);
+    btn.querySelector('.t-cap').textContent=hit?'cap reached':(t.capLabel||'');
+  });
+
+  var allChecked=BUNDLES.every(function(b){return S.bchecks[b.id];});
+  var bc=document.getElementById('bclaim');
+  if(S.bdone){bc.textContent='Claimed today';bc.className='bclaim claimed';bc.disabled=true;}
+  else if(allChecked){bc.textContent='Claim +50 XP';bc.className='bclaim ready';bc.disabled=false;}
+  else{bc.textContent='Claim +50 XP';bc.className='bclaim';bc.disabled=true;}
+
+  document.querySelectorAll('.runlock').forEach(function(b){
+    var c=parseInt(b.dataset.cost);
+    b.disabled=S.xp<c;
+    b.classList.toggle('on',S.xp>=c);
+  });
+}
+
+function renderTasks(){
+  var g=document.getElementById('tasks-grid');
+  g.innerHTML='';
+  TASKS.forEach(function(t){
+    var btn=document.createElement('button');
+    btn.className='task-btn';btn.id='tbtn-'+t.id;
+    btn.innerHTML='<div class="t-name">'+t.name+'</div><div class="t-xp">+'+t.xp+' XP</div><div class="t-cap">'+(t.capLabel||'')+'</div>';
+    btn.addEventListener('click',function(){earnTask(t);});
+    g.appendChild(btn);
+  });
+}
+
+function earnTask(t){
+  var earned=S.taskXp[t.id]||0;
+  if(t.cap&&earned>=t.cap) return;
+  var wasBelow=S.today<GOAL;
+  S.taskXp[t.id]=earned+t.xp;S.xp+=t.xp;S.today+=t.xp;
+  S.log.unshift({ts:ts(),text:'Completed: '+t.name,type:'earn',val:t.xp});
+  if(wasBelow&&S.today>=GOAL&&!S.goalLogged){
+    S.goalLogged=true;
+    S.log.unshift({ts:ts(),text:'Daily goal reached',type:'mile',val:null});
+  }
+  save();updateUI();renderLog();
+}
+
+function renderBundle(){
+  var c=document.getElementById('bundle-checks');
+  c.innerHTML='';
+  BUNDLES.forEach(function(b){
+    var row=document.createElement('div');row.className='bcheck';
+    var box=document.createElement('div');
+    box.className='bbox'+(S.bchecks[b.id]?' on':'');
+    box.addEventListener('click',function(){
+      if(S.bdone) return;
+      S.bchecks[b.id]=!S.bchecks[b.id];
+      save();renderBundle();updateUI();
+    });
+    var lbl=document.createElement('span');lbl.className='blabel';lbl.textContent=b.label;
+    row.appendChild(box);row.appendChild(lbl);c.appendChild(row);
+  });
+}
+
+document.getElementById('bclaim').addEventListener('click',function(){
+  if(S.bdone||!BUNDLES.every(function(b){return S.bchecks[b.id];})) return;
+  var wasBelow=S.today<GOAL;
+  S.bdone=true;S.xp+=50;S.today+=50;
+  S.log.unshift({ts:ts(),text:'Daily grind bundle claimed',type:'bundle',val:50});
+  if(wasBelow&&S.today>=GOAL&&!S.goalLogged){
+    S.goalLogged=true;
+    S.log.unshift({ts:ts(),text:'Daily goal reached',type:'mile',val:null});
+  }
+  save();renderBundle();updateUI();renderLog();
+});
+
+function renderRewards(){
+  var list=document.getElementById('rewards-list');
+  list.innerHTML='';
+  REWARDS.forEach(function(rw,i){
+    var row=document.createElement('div');row.className='rcard';
+    row.innerHTML='<span class="rname">'+rw.name+'</span><span class="rcost">'+rw.cost+' XP</span><button class="runlock" data-cost="'+rw.cost+'">Unlock</button>';
+    row.querySelector('.runlock').addEventListener('click',function(){
+      if(S.xp<rw.cost) return;
+      S.xp-=rw.cost;
+      S.log.unshift({ts:ts(),text:'Unlocked: '+rw.name,type:'spend',val:rw.cost});
+      save();updateUI();renderLog();
+    });
+    list.appendChild(row);
+  });
+}
+
+function renderLog(){
+  var el=document.getElementById('log-card');
+  if(!S.log.length){el.innerHTML='<div class="log-empty">No activity yet.</div>';return;}
+  el.innerHTML=S.log.slice(0,30).map(function(e){
+    if(e.type==='mile') return '<div class="log-entry"><span class="ltime">'+e.ts+'</span><span class="ltext">'+e.text+'</span><span class="lval c-mile">—</span></div>';
+    var cls='c-'+(e.type==='earn'?'earn':e.type==='bundle'?'bundle':'spend');
+    var sign=e.type==='spend'?'−':'+';
+    return '<div class="log-entry"><span class="ltime">'+e.ts+'</span><span class="ltext">'+e.text+'</span><span class="lval '+cls+'">'+sign+e.val+'</span></div>';
+  }).join('');
+}
+
+function renderHistory(){
+  var el=document.getElementById('hist-list');
+  if(!S.history||!S.history.length){el.innerHTML='<div class="hempty">No history yet.<br>Reset a day to archive it here.</div>';return;}
+  el.innerHTML=[].concat(S.history).reverse().map(function(day){
+    var tasks=day.tasks&&day.tasks.length?day.tasks.join(', '):'none';
+    var unlocked=day.unlocked&&day.unlocked.length?day.unlocked.join(', '):'none';
+    return '<div class="hday"><div class="hdate">'+day.date+'</div>'
+      +'<div class="hstats">'
+      +'<div class="hstat">Earned <b>'+day.earned+' XP</b></div>'
+      +'<div class="hstat">Spent <b>'+day.spent+' XP</b></div>'
+      +'<div class="hstat">Goal <b>'+(day.earned>=GOAL?'hit':'missed')+'</b></div>'
+      +(day.bundle?'<div class="hstat">Bundle <b>claimed</b></div>':'')
+      +'</div>'
+      +'<div class="htasks">Tasks: '+tasks+'</div>'
+      +'<div class="htasks" style="margin-top:3px">Rewards: '+unlocked+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function doArchive(){
+  var tasks=[...new Set(S.log.filter(function(e){return e.type==='earn';}).map(function(e){return e.text.replace('Completed: ','');}))];
+  var unlocked=[...new Set(S.log.filter(function(e){return e.type==='spend';}).map(function(e){return e.text.replace('Unlocked: ','');}))];
+  var spent=S.log.filter(function(e){return e.type==='spend';}).reduce(function(a,e){return a+(e.val||0);},0);
+  if(S.today>0||S.bdone){
+    if(!S.history) S.history=[];
+    S.history.push({date:dateStr(),earned:S.today,spent:spent,tasks:tasks,unlocked:unlocked,bundle:S.bdone});
+  }
+  var keepXP=S.xp;var keepHist=S.history||[];
+  S=def();S.xp=keepXP;S.history=keepHist;S.lastDay=todayKey();
+}
+
+function checkMidnightReset(){
+  var today=todayKey();
+  if(S.lastDay&&S.lastDay!==today){doArchive();save();}
+  S.lastDay=today;save();
+  document.getElementById('topbar-date').textContent=dateStr();
+}
+
+function scheduleMidnight(){
+  var now=new Date();
+  var next=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,5);
+  setTimeout(function(){
+    doArchive();S.lastDay=todayKey();save();
+    renderTasks();renderBundle();renderLog();updateUI();
+    document.getElementById('topbar-date').textContent=dateStr();
+    scheduleMidnight();
+  },next-now);
+}
+
+// INIT
+checkMidnightReset();
+renderTasks();
+renderBundle();
+renderRewards();
+renderLog();
+updateUI();
+scheduleMidnight();
+</script>
+</body>
+</html>
